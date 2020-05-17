@@ -1,0 +1,82 @@
+#!/bin/sh
+
+readonly CURRENT_COMMIT=`git rev-parse HEAD`
+readonly CURRENT_LOG=`git log --date=short --pretty='format:%C(yellow)%h %C(cyan)%ad %C(green)%an%Creset%x09%s %C(red)%d%Creset' -n 1`
+
+function ResetStatus() {
+  echo "\n  状態を実行前に戻しますか？(git reset --hard <実行前のcommit>)"
+  printf "  実行前の状態: $CURRENT_LOG"
+  echo "\n  y または n を入力して下さい."
+  read input
+  if [ -z $input ] ; then
+    echo "  y または n を入力して下さい."
+    ResetStatus
+  elif [ $input = 'yes' ] || [ $input = 'YES' ] || [ $input = 'y' ] ; then
+    echo "  状態を戻します"
+    git reset --hard $CURRENT_COMMIT
+    exit 1
+  elif [ $input = 'no' ] || [ $input = 'NO' ] || [ $input = 'n' ] ; then
+    echo "  終了します."
+    exit 1
+  else
+    echo "  y または n を入力して下さい."
+    ResetStatus
+  fi
+}
+
+function ConfirmExecution() {
+  echo "  実行する場合は y、実行をキャンセルする場合は n と入力して下さい."
+  read input
+
+  if [ -z $input ] ; then
+    echo "  y または n を入力して下さい."
+    ConfirmExecution
+  elif [ $input = 'yes' ] || [ $input = 'YES' ] || [ $input = 'y' ] ; then
+    echo "  実行します."
+  elif [ $input = 'no' ] || [ $input = 'NO' ] || [ $input = 'n' ] ; then
+    echo "  終了します."
+    ResetStatus
+  else
+    echo "  y または n を入力して下さい."
+    ConfirmExecution
+  fi
+}
+
+function checkoutOperation() {
+  if [ -n "$1" ] && [ ${1::1} != '#' ]; then
+    echo "\n  ' $1 ' の取り込みを実行します."
+    ConfirmExecution
+    echo "\nRUN: git checkout $1"
+    git checkout $1
+    echo "done."
+  fi
+}
+
+if [ $# -ne 2 ]; then
+  echo "There is no tracking information for the current branch."
+  echo "Please specify which branch you want to merge with."
+  echo ""
+  echo "    git ordered-merge <remote> <branch>"
+  exit 1
+fi
+
+
+echo "  ordered mergeを実行しますか？commitしていない変更は失われてしまいます."
+ConfirmExecution
+
+readonly ORIGIN_NAME=$1
+readonly ORIGIN_BRANCH=$2
+
+echo "\nRUN: git fetch"
+git fetch
+echo "done."
+echo "\nRUN: git reset --mixed $1/$2"
+git reset --mixed $1/$2
+echo "done."
+order=(`cat ./.git/info/checkout-order`)
+
+ln=0
+for line in "${order[@]}"; do
+  checkoutOperation $line
+done
+
