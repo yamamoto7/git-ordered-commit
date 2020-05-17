@@ -1,24 +1,24 @@
 ## Git Ordered Merge
 
-### $B35MW(B
-Git$B$K$*$$$F!"%U%!%$%k$d%G%#%l%/%H%j$r(Bmerge$B$9$k=g=x7h$a$r2DG=$K$7$^$9!#(B
-$B8=;EMM$G$O%j%b!<%H%j%]%8%H%j$+$i$N(Bmerge$B$N$_$r%+%P!<$7$F$$$^$9!#(B
+### 概要
+Gitにおいて、ファイルやディレクトリをmergeする順序決めを可能にします。
+現仕様ではリモートリポジトリからのmergeのみをカバーしています。
 
 ### Useage
 
-#### $B%3%^%s%I(B
-git-ordered-merge$B$H$$$&%U%!%$%k$r(BPATH$B$NDL$C$F$$$k>l=j$KCV$/!"(B
-$B$^$?$O(BPATH$B$rDL$9;v$K$h$C$F%3%^%s%I$r;HMQ$9$k$3$H$,$G$-$k$h$&$K$J$j$^$9!#(B
+#### コマンド
+git-ordered-mergeというファイルをPATHの通っている場所に置く、
+またはPATHを通す事によってコマンドを使用することができるようになります。
 ```
 $ git ordered-merge <remote> <branch> 
 ```
 
-#### $B=gHV$N7h$aJ}(B
+#### 順番の決め方
 
-merge$B$7$h$&$H$7$F$$$k%W%m%@%/%H%k!<%H$KF~$C$F$$$k!"(B.git$BFb$K@_Dj%U%!%$%k$rDI2C$9$k$3$H$G=g=x$r7h$a$k$3$H$,$G$-$^$9!#(B
-`.git/info/checkout-order`$B$H$$$&%U%!%$%k$rDI2C$7$F$/$@$5$$!#(B
+mergeしようとしているプロダクトルートに入っている、.git内に設定ファイルを追加することで順序を決めることができます。
+`.git/info/checkout-order`というファイルを追加してください。
 
-$BNc(B
+例
 .git/info/checkout-order
 ```
 server/
@@ -27,4 +27,4 @@ client/
 .
 ```
 
-$B>e5-$NNc$O!">e$+$i=gHV$K(Bmerge$B$5$l$F:G=*E*$K(B`.`$B$K$h$C$F%+%l%s%H%G%#%l%/%H%jFb$N$9$Y$F$N%U%!%$%k$r(Bmerge$B$9$k5-=R$G$9!#(B
+上記の例は、上から順番にmergeされて最終的に`.`によってカレントディレクトリ内のすべてのファイルをmergeする記述です。
